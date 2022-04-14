@@ -1,8 +1,6 @@
 package handlers
 
 import (
-	"bufio"
-	"bytes"
 	"encoding/json"
 	"net/http"
 
@@ -10,6 +8,7 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/srimaln91/crud-app-go/core/entities"
 	"github.com/srimaln91/crud-app-go/core/interfaces"
+	"github.com/srimaln91/crud-app-go/http/response"
 )
 
 type handler struct {
@@ -25,9 +24,6 @@ func NewHttpHandler(eventRepository interfaces.EventRepository, logger interface
 }
 
 func (h *handler) AddEvent(rw http.ResponseWriter, r *http.Request) {
-	//read body
-
-	//validate struct
 	var event entities.Event
 	err := json.NewDecoder(r.Body).Decode(&event)
 	if err != nil {
@@ -45,16 +41,7 @@ func (h *handler) AddEvent(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var responseWriter bytes.Buffer
-	err = json.NewEncoder(bufio.NewWriter(&responseWriter)).Encode(event)
-	if err != nil {
-		rw.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-
-	rw.Header().Add("Content-Type", "application/json")
-	rw.WriteHeader(http.StatusCreated)
-	rw.Write(responseWriter.Bytes())
+	response.WriteSuccessResponse(rw, event, http.StatusCreated)
 }
 
 func (h *handler) GetEvent(rw http.ResponseWriter, r *http.Request) {
@@ -72,15 +59,7 @@ func (h *handler) GetEvent(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	bytes, err := json.Marshal(entry)
-	if err != nil {
-		rw.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-
-	rw.Header().Add("Content-Type", "application/json")
-	rw.WriteHeader(http.StatusOK)
-	rw.Write(bytes)
+	response.WriteSuccessResponse(rw, entry, http.StatusCreated)
 }
 
 func (h *handler) GetAllEvents(rw http.ResponseWriter, r *http.Request) {
@@ -90,13 +69,5 @@ func (h *handler) GetAllEvents(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	bytes, err := json.Marshal(entries)
-	if err != nil {
-		rw.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-
-	rw.Header().Add("Content-Type", "application/json")
-	rw.WriteHeader(http.StatusOK)
-	rw.Write(bytes)
+	response.WriteSuccessResponse(rw, entries, http.StatusOK)
 }
