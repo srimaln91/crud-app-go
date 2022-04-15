@@ -16,7 +16,7 @@ type Server struct {
 }
 
 // Init initializes the server
-func Start(address string, ctr *container.Container) (Server, error) {
+func Start(address string, ctr *container.Container) (*Server, error) {
 
 	// initialize the router
 	handler, _ := newRouter(ctr)
@@ -45,7 +45,7 @@ func Start(address string, ctr *container.Container) (Server, error) {
 	// srv.server = server
 	ctr.Logger.Info(context.Background(), fmt.Sprintf("HTTP server listening on %s", address), "functional_path", "http.server.Init")
 
-	return Server{
+	return &Server{
 		httpServer: *httpServer,
 	}, nil
 

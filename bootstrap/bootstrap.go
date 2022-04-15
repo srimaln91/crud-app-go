@@ -3,6 +3,7 @@ package bootstrap
 import (
 	"context"
 	"database/sql"
+	"flag"
 	"fmt"
 	"log"
 	"os"
@@ -21,10 +22,12 @@ import (
 
 var dbAdapter *sql.DB
 var logAdapter interfaces.Logger
-var httpServer server.Server
+var httpServer *server.Server
 
 func Start() {
-	cfg, err := config.Parse("config.yaml")
+	configFilePath := flag.String("config", "config/config.yaml", "config file path")
+	flag.Parse()
+	cfg, err := config.Parse(*configFilePath)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -51,6 +54,7 @@ func Start() {
 	}
 
 	eventRepository := repositiories.NewEventRepository(dbAdapter, logAdapter)
+
 	// Build container
 	ctr := &container.Container{
 		DBAdapter:       dbAdapter,
@@ -58,6 +62,7 @@ func Start() {
 		Logger:          logAdapter,
 	}
 
+	// Initialize and start HTTP server
 	httpServer, err = server.Start(fmt.Sprintf("%s:%d", "0.0.0.0", cfg.HTTP.Port), ctr)
 	if err != nil {
 		logAdapter.Fatal(context.Background(), err.Error())
@@ -85,7 +90,7 @@ func Start() {
 func Destruct() {
 
 	// Shutdown Http server
-	// create a deadline of 10 seconds
+	// create a deadline of 5 seconds
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
 	defer cancel()
 
