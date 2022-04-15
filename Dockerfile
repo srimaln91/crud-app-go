@@ -1,7 +1,5 @@
 FROM golang:1.16-alpine AS build_go
 
-RUN apk add --no-cache git
-
 WORKDIR /tmp/crud-app
 
 # We want to populate the module cache based on the go.{mod,sum} files.
@@ -15,7 +13,7 @@ COPY . .
 RUN ls -al
 
 # Unit tests
-#RUN CGO_ENABLED=0 go test -v
+RUN CGO_ENABLED=0 go test -v
 
 # Build the Go app
 RUN CGO_ENABLED=0 go build -o crud-app-linux-amd64 cmd/api/main.go
