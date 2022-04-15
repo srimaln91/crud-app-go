@@ -22,5 +22,7 @@ func newRouter(ctr *container.Container) (http.Handler, error) {
 	r.HandleFunc("/rest/events/{id}", httpHandler.UpdateEvent).Methods(http.MethodPut)
 	r.HandleFunc("/rest/events/{id}", httpHandler.DeleteEvent).Methods(http.MethodDelete)
 
+	r.HandleFunc("/rest/batch", httpHandler.AddEventBatch).Methods(http.MethodPost)
+
 	return r, nil
 }

@@ -9,6 +9,7 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/srimaln91/crud-app-go/core/entities"
 	"github.com/srimaln91/crud-app-go/core/interfaces"
+	"github.com/srimaln91/crud-app-go/http/request"
 	"github.com/srimaln91/crud-app-go/http/response"
 )
 
@@ -118,6 +119,45 @@ func (h *handler) DeleteEvent(rw http.ResponseWriter, r *http.Request) {
 	}
 
 	response.WriteSuccessResponse(rw, nil, http.StatusOK)
+}
+
+func (h *handler) AddEventBatch(rw http.ResponseWriter, r *http.Request) {
+	var batchRequest request.EventBatch
+	err := json.NewDecoder(r.Body).Decode(&batchRequest)
+	if err != nil {
+		rw.WriteHeader(http.StatusNotAcceptable)
+		return
+	}
+
+	defer r.Body.Close()
+
+	events := make([]entities.Event, 0)
+
+	for _, record := range batchRequest.Records {
+		for _, event := range record.Event {
+			events = append(events, entities.Event{
+				ID:          uuid.New().String(),
+				TransId:     record.TransID,
+				TransTms:    record.TransTms,
+				RcNum:       record.RcNum,
+				ClientId:    record.ClientID,
+				EventCnt:    event.EventCnt,
+				LocationCd:  event.LocationCd,
+				LocationId1: event.LocationID1,
+				LocationId2: event.LocationID2,
+				AddrNbr:     event.AddrNbr,
+			})
+		}
+	}
+
+	err = h.eventRepository.InsertBatch(r.Context(), events)
+	if err != nil {
+		h.logger.Error(r.Context(), err.Error())
+		rw.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	response.WriteSuccessResponse(rw, nil, http.StatusCreated)
 }
 
 func getURLParam(r *http.Request, parameter string) (string, error) {

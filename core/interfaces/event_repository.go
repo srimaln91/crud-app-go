@@ -12,4 +12,5 @@ type EventRepository interface {
 	Update(ctx context.Context, id string, event entities.Event) error
 	Get(ctx context.Context, id string) (entities.Event, error)
 	GetAll(ctx context.Context) ([]entities.Event, error)
+	InsertBatch(ctx context.Context, batch []entities.Event) error
 }
