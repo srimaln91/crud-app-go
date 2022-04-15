@@ -21,6 +21,7 @@ import (
 
 var dbAdapter *sql.DB
 var logAdapter interfaces.Logger
+var httpServer server.Server
 
 func Start() {
 	cfg, err := config.Parse("config.yaml")
@@ -57,7 +58,7 @@ func Start() {
 		Logger:          logAdapter,
 	}
 
-	httpServer, err := server.Start(fmt.Sprintf("%s:%d", "0.0.0.0", cfg.HTTP.Port), ctr)
+	httpServer, err = server.Start(fmt.Sprintf("%s:%d", "0.0.0.0", cfg.HTTP.Port), ctr)
 	if err != nil {
 		logAdapter.Fatal(context.Background(), err.Error())
 	}
@@ -72,15 +73,7 @@ func Start() {
 	signal := <-c
 
 	logAdapter.Info(context.Background(), fmt.Sprintf("received signal: %s", signal))
-
-	// Shutdown Http server
-	// Create a deadline to wait for.
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
-	defer cancel()
-
-	httpServer.ShutDown(ctx)
-
-	<-ctx.Done()
+	logAdapter.Info(context.Background(), "shutting down the service...")
 
 	// Destruct other respouces and stop the service
 	Destruct()
@@ -90,8 +83,21 @@ func Start() {
 }
 
 func Destruct() {
+
+	// Shutdown Http server
+	// create a deadline of 10 seconds
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
+	defer cancel()
+
+	httpServer.ShutDown(ctx)
+
+	<-ctx.Done()
+
+	// Close active/idle DB connections
 	err := dbAdapter.Close()
 	if err != nil {
 		logAdapter.Error(context.Background(), err.Error())
 	}
+
+	logAdapter.Info(context.Background(), "service shutted down gracefully.")
 }

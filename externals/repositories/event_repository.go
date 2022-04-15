@@ -1,6 +1,7 @@
 package repositories
 
 import (
+	"context"
 	"database/sql"
 
 	"github.com/srimaln91/crud-app-go/core/entities"
@@ -44,8 +45,8 @@ func NewEventRepository(dbAdapter *sql.DB, logger interfaces.Logger) *eventRepos
 	}
 }
 
-func (er *eventRepository) Add(event entities.Event) error {
-	_, err := er.db.Exec(insertQuery,
+func (er *eventRepository) Add(ctx context.Context, event entities.Event) error {
+	_, err := er.db.ExecContext(ctx, insertQuery,
 		event.ID,
 		event.AddrNbr,
 		event.ClientId,
@@ -65,8 +66,8 @@ func (er *eventRepository) Add(event entities.Event) error {
 	return nil
 }
 
-func (er *eventRepository) GetAll() ([]entities.Event, error) {
-	rows, err := er.db.Query(selectAllQuery)
+func (er *eventRepository) GetAll(ctx context.Context) ([]entities.Event, error) {
+	rows, err := er.db.QueryContext(ctx, selectAllQuery)
 	if err != nil {
 		return nil, err
 	}
@@ -96,8 +97,8 @@ func (er *eventRepository) GetAll() ([]entities.Event, error) {
 
 	return events, nil
 }
-func (er *eventRepository) Remove(id string) error {
-	_, err := er.db.Exec(deleteQuery, id)
+func (er *eventRepository) Remove(ctx context.Context, id string) error {
+	_, err := er.db.ExecContext(ctx, deleteQuery, id)
 
 	if err != nil {
 		return err
@@ -105,8 +106,8 @@ func (er *eventRepository) Remove(id string) error {
 
 	return nil
 }
-func (er *eventRepository) Update(id string, event entities.Event) error {
-	_, err := er.db.Exec(updateQuery,
+func (er *eventRepository) Update(ctx context.Context, id string, event entities.Event) error {
+	_, err := er.db.ExecContext(ctx, updateQuery,
 		event.AddrNbr,
 		event.ClientId,
 		event.EventCnt,
@@ -126,8 +127,8 @@ func (er *eventRepository) Update(id string, event entities.Event) error {
 	return nil
 }
 
-func (er *eventRepository) Get(id string) (entities.Event, error) {
-	rows, err := er.db.Query(selectQuery, id)
+func (er *eventRepository) Get(ctx context.Context, id string) (entities.Event, error) {
+	rows, err := er.db.QueryContext(ctx, selectQuery, id)
 	if err != nil {
 		return entities.Event{}, err
 	}

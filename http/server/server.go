@@ -10,13 +10,13 @@ import (
 	"github.com/srimaln91/crud-app-go/core/interfaces"
 )
 
-type server struct {
+type Server struct {
 	httpServer http.Server
 	logger     interfaces.Logger
 }
 
 // Init initializes the server
-func Start(address string, ctr *container.Container) (server, error) {
+func Start(address string, ctr *container.Container) (Server, error) {
 
 	// initialize the router
 	handler, _ := newRouter(ctr)
@@ -45,14 +45,14 @@ func Start(address string, ctr *container.Container) (server, error) {
 	// srv.server = server
 	ctr.Logger.Info(context.Background(), fmt.Sprintf("HTTP server listening on %s", address), "functional_path", "http.server.Init")
 
-	return server{
+	return Server{
 		httpServer: *httpServer,
 	}, nil
 
 }
 
 // ShutDown releases all http connections gracefully and shut down the server
-func (srv *server) ShutDown(ctx context.Context) {
+func (srv *Server) ShutDown(ctx context.Context) {
 
 	// srv.logger.Warn("http.server.ShutDown", "Stopping HTTP Server")
 	srv.httpServer.SetKeepAlivesEnabled(false)
