@@ -5,9 +5,11 @@ import (
 	"database/sql"
 	"fmt"
 	"strings"
+	"sync"
 
 	"github.com/srimaln91/crud-app-go/core/entities"
 	"github.com/srimaln91/crud-app-go/core/interfaces"
+	"github.com/srimaln91/crud-app-go/util"
 )
 
 const (
@@ -164,71 +166,74 @@ func (er *eventRepository) Get(ctx context.Context, id string) (entities.Event, 
 	return event, nil
 }
 
-func (er *eventRepository) InsertBatch(ctx context.Context, batch []entities.Event) error {
+// InsertBatch accepts a set of events and insert it to the database in a single transactoin
+// This method is optimized to reduce network roundtrips by executing queries as batches
+func (er *eventRepository) InsertBatch(ctx context.Context, events []entities.Event) error {
 
 	tx, err := er.db.Begin()
 	if err != nil {
 		return err
 	}
 
-	chunks := chunkSlice(batch, batchSize)
-	var i = 1
+	chunks := util.ChunkEventSlice(events, batchSize)
+	wg := new(sync.WaitGroup)
+	var execError error
+
 	for _, chunk := range chunks {
-		valueStrings := []string{}
-		valueArgs := []interface{}{}
-		for _, event := range chunk {
 
-			valueStrings = append(
-				valueStrings,
-				fmt.Sprintf("($%d, $%d, $%d, $%d, $%d, $%d, $%d, $%d, $%d, $%d)",
-					[]interface{}{i, i + 1, i + 2, i + 3, i + 4, i + 5, i + 6, i + 7, i + 8, i + 9}...),
-			)
+		wg.Add(1)
+		go func(chunk []entities.Event) {
+			defer wg.Done()
 
-			valueArgs = append(valueArgs, event.ID)
-			valueArgs = append(valueArgs, event.AddrNbr)
-			valueArgs = append(valueArgs, event.ClientId)
-			valueArgs = append(valueArgs, event.EventCnt)
-			valueArgs = append(valueArgs, event.LocationCd)
-			valueArgs = append(valueArgs, event.LocationId1)
-			valueArgs = append(valueArgs, event.LocationId2)
-			valueArgs = append(valueArgs, event.RcNum)
-			valueArgs = append(valueArgs, event.TransId)
-			valueArgs = append(valueArgs, event.TransTms)
+			valueStrings := []string{}
+			valueArgs := []interface{}{}
 
-			i += 10
-		}
+			var paramIndex = 0
+			for _, event := range chunk {
 
-		stmt := fmt.Sprintf(insertBatchQuery, strings.Join(valueStrings, ","))
-		_, err = tx.Exec(stmt, valueArgs...)
-		if err != nil {
-			tx.Rollback()
-			return err
-		}
+				valueStrings = append(
+					valueStrings,
+					fmt.Sprintf("($%d, $%d, $%d, $%d, $%d, $%d, $%d, $%d, $%d, $%d)",
+						[]interface{}{
+							paramIndex + 1, paramIndex + 2, paramIndex + 3, paramIndex + 4, paramIndex + 5,
+							paramIndex + 6, paramIndex + 7, paramIndex + 8, paramIndex + 9, paramIndex + 10}...,
+					),
+				)
+
+				valueArgs = append(valueArgs, event.ID)
+				valueArgs = append(valueArgs, event.AddrNbr)
+				valueArgs = append(valueArgs, event.ClientId)
+				valueArgs = append(valueArgs, event.EventCnt)
+				valueArgs = append(valueArgs, event.LocationCd)
+				valueArgs = append(valueArgs, event.LocationId1)
+				valueArgs = append(valueArgs, event.LocationId2)
+				valueArgs = append(valueArgs, event.RcNum)
+				valueArgs = append(valueArgs, event.TransId)
+				valueArgs = append(valueArgs, event.TransTms)
+
+				paramIndex += 10
+			}
+
+			stmt := fmt.Sprintf(insertBatchQuery, strings.Join(valueStrings, ","))
+			_, err = tx.Exec(stmt, valueArgs...)
+			if err != nil {
+				execError = err
+			}
+		}(chunk)
 	}
+
+	wg.Wait()
+
+	// Rollback the transaction if there were any execution failures reported in related queries
+	if execError != nil {
+		tx.Rollback()
+		return execError
+	}
+
 	err = tx.Commit()
 	if err != nil {
 		return err
 	}
 
 	return nil
-}
-
-func chunkSlice(slice []entities.Event, chunkSize int) [][]entities.Event {
-	var chunks [][]entities.Event
-	for {
-		if len(slice) == 0 {
-			break
-		}
-
-		// necessary check to avoid slicing beyond
-		// slice capacity
-		if len(slice) < chunkSize {
-			chunkSize = len(slice)
-		}
-
-		chunks = append(chunks, slice[0:chunkSize])
-		slice = slice[chunkSize:]
-	}
-
-	return chunks
 }
