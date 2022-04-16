@@ -3,8 +3,8 @@ FROM golang:1.16-alpine AS build_go
 ARG DATE
 ARG COMMIT
 ARG VERSION
-ARG OS=$(go env GOOS)
-ARG ARCH=$(go env GOARCH)
+ARG OS="linux"
+ARG ARCH="amd64"
 WORKDIR /tmp/crud-app
 
 # We want to populate the module cache based on the go.{mod,sum} files.

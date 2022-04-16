@@ -1,0 +1,21 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: rest-app-config-go
+data:
+  config.yaml: |
+    http:
+      port: 8080
+
+    logger:
+      level: "DEBUG"
+
+    database:
+      host: postgresql
+      port: 5432
+      name: events
+      user: docker
+      password: 'docker@123'
+      pool_size: 5
+      max_idle_connections: 2
+      conn_max_lifetime: 300000
