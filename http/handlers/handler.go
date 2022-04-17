@@ -44,6 +44,7 @@ func (h *handler) AddEvent(rw http.ResponseWriter, r *http.Request) {
 
 	err = h.eventRepository.Add(r.Context(), event)
 	if err != nil {
+		h.logger.Error(r.Context(), err.Error())
 		response.GenerateInternalServerError().Write(rw)
 		return
 	}
@@ -65,6 +66,7 @@ func (h *handler) GetEvent(rw http.ResponseWriter, r *http.Request) {
 
 	entry, err := h.eventRepository.Get(r.Context(), eventID)
 	if err != nil {
+		h.logger.Error(r.Context(), err.Error())
 		response.GenerateInternalServerError().Write(rw)
 		return
 	}
@@ -105,6 +107,7 @@ func (h *handler) UpdateEvent(rw http.ResponseWriter, r *http.Request) {
 
 	recordExist, err := h.eventRepository.Update(r.Context(), event.ID, event)
 	if err != nil {
+		h.logger.Error(r.Context(), err.Error())
 		response.GenerateInternalServerError().Write(rw)
 		return
 	}
@@ -129,6 +132,7 @@ func (h *handler) UpdateEvent(rw http.ResponseWriter, r *http.Request) {
 func (h *handler) GetAllEvents(rw http.ResponseWriter, r *http.Request) {
 	entries, err := h.eventRepository.GetAll(r.Context())
 	if err != nil {
+		h.logger.Error(r.Context(), err.Error())
 		response.GenerateInternalServerError().Write(rw)
 		return
 	}
@@ -150,6 +154,7 @@ func (h *handler) DeleteEvent(rw http.ResponseWriter, r *http.Request) {
 
 	resourceExist, err := h.eventRepository.Remove(r.Context(), eventID)
 	if err != nil {
+		h.logger.Error(r.Context(), err.Error())
 		response.GenerateInternalServerError().Write(rw)
 		return
 	}
@@ -200,6 +205,7 @@ func (h *handler) AddEventBatch(rw http.ResponseWriter, r *http.Request) {
 
 	err = h.eventRepository.InsertBatch(r.Context(), events)
 	if err != nil {
+		h.logger.Error(r.Context(), err.Error())
 		response.GenerateInternalServerError().Write(rw)
 		return
 	}
