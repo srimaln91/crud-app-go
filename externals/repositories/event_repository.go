@@ -107,6 +107,7 @@ func (er *eventRepository) GetAll(ctx context.Context) ([]entities.Event, error)
 
 	return events, nil
 }
+
 func (er *eventRepository) Remove(ctx context.Context, id string) (rowsAffected bool, err error) {
 	result, err := er.db.ExecContext(ctx, deleteQuery, id)
 	if err != nil {
