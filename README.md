@@ -56,6 +56,12 @@ database:
 
 The image will be tagged automatically based on git tags/revisions
 
+Note: Have to point the shell to minikube Docker daemon before building images
+
+```bash
+ eval $(minikube -p minikube docker-env)
+```
+
 ```bash
 make image
 ```

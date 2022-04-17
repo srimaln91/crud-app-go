@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: crud-app-deployment-go
+  name: crud-app-go-deployment
   labels:
     app: crud-app-go
 spec:
@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: crud-app-go
-        image: crud-app-go:v1.3.0
+        image: crud-app-go:v1.4.0
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 8080
@@ -26,4 +26,4 @@ spec:
       volumes:
       - name: config
         configMap:
-          name: rest-app-config-go
+          name: crud-app-config-go

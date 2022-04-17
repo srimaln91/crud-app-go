@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: rest-app-config-go
+  name: crud-app-config-go
 data:
   config.yaml: |
     http:

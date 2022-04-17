@@ -1,12 +1,12 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: rest-app-go
+  name: crud-app-go-service
 spec:
   type: LoadBalancer
   selector:
       app: crud-app-go
   ports:
     - protocol: TCP
-      port: 8081
+      port: 8080
       targetPort: 8080

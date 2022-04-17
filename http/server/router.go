@@ -16,13 +16,13 @@ func newRouter(ctr *container.Container) (http.Handler, error) {
 
 	r := mux.NewRouter()
 
-	r.HandleFunc("/rest/events", httpHandler.AddEvent).Methods(http.MethodPost)
-	r.HandleFunc("/rest/events", httpHandler.GetAllEvents).Methods(http.MethodGet)
-	r.HandleFunc("/rest/events/{id}", httpHandler.GetEvent).Methods(http.MethodGet)
-	r.HandleFunc("/rest/events/{id}", httpHandler.UpdateEvent).Methods(http.MethodPut)
-	r.HandleFunc("/rest/events/{id}", httpHandler.DeleteEvent).Methods(http.MethodDelete)
+	r.HandleFunc("/api/events", httpHandler.AddEvent).Methods(http.MethodPost)
+	r.HandleFunc("/api/events", httpHandler.GetAllEvents).Methods(http.MethodGet)
+	r.HandleFunc("/api/events/{id}", httpHandler.GetEvent).Methods(http.MethodGet)
+	r.HandleFunc("/api/events/{id}", httpHandler.UpdateEvent).Methods(http.MethodPut)
+	r.HandleFunc("/api/events/{id}", httpHandler.DeleteEvent).Methods(http.MethodDelete)
 
-	r.HandleFunc("/rest/batch", httpHandler.AddEventBatch).Methods(http.MethodPost)
+	r.HandleFunc("/api/batch", httpHandler.AddEventBatch).Methods(http.MethodPost)
 
 	return r, nil
 }
