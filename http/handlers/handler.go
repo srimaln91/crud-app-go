@@ -33,7 +33,7 @@ func (h *handler) AddEvent(rw http.ResponseWriter, r *http.Request) {
 	var event entities.Event
 	err := json.NewDecoder(r.Body).Decode(&event)
 	if err != nil {
-		rw.WriteHeader(http.StatusNotAcceptable)
+		response.GenerateInvalidRequestError().Write(rw)
 		return
 	}
 
@@ -43,65 +43,99 @@ func (h *handler) AddEvent(rw http.ResponseWriter, r *http.Request) {
 
 	err = h.eventRepository.Add(r.Context(), event)
 	if err != nil {
-		rw.WriteHeader(http.StatusInternalServerError)
+		response.GenerateInternalServerError().Write(rw)
 		return
 	}
 
-	response.WriteSuccessResponse(rw, event, http.StatusCreated)
+	response.New(
+		response.ACTION_SUCCESS,
+		http.StatusCreated,
+		response.WithData(event),
+	).Write(rw)
 }
 
 func (h *handler) GetEvent(rw http.ResponseWriter, r *http.Request) {
 
 	eventID, err := getURLParam(r, URL_PARAM_ID)
 	if err != nil {
-		rw.WriteHeader(http.StatusNotAcceptable)
+		response.GenerateInvalidRequestError().Write(rw)
 		return
 	}
 
 	entry, err := h.eventRepository.Get(r.Context(), eventID)
 	if err != nil {
-		rw.WriteHeader(http.StatusInternalServerError)
+		response.GenerateInternalServerError().Write(rw)
 		return
 	}
 
-	response.WriteSuccessResponse(rw, entry, http.StatusCreated)
+	if entry == nil {
+		response.New(
+			response.ACTION_ERROR,
+			http.StatusNotFound,
+		).Write(rw)
+		return
+	}
+
+	response.New(
+		response.ACTION_SUCCESS,
+		http.StatusOK,
+		response.WithData(entry),
+	).Write(rw)
 }
 
 func (h *handler) UpdateEvent(rw http.ResponseWriter, r *http.Request) {
 
 	eventID, err := getURLParam(r, URL_PARAM_ID)
 	if err != nil {
-		rw.WriteHeader(http.StatusNotAcceptable)
+		response.GenerateInvalidRequestError().Write(rw)
 		return
 	}
 
 	var event entities.Event
 	err = json.NewDecoder(r.Body).Decode(&event)
 	if err != nil {
-		rw.WriteHeader(http.StatusNotAcceptable)
+		response.GenerateInvalidRequestError().Write(rw)
 		return
 	}
 
 	event.ID = eventID
 	defer r.Body.Close()
 
-	err = h.eventRepository.Update(r.Context(), event.ID, event)
+	recordExist, err := h.eventRepository.Update(r.Context(), event.ID, event)
 	if err != nil {
-		rw.WriteHeader(http.StatusInternalServerError)
+		response.GenerateInternalServerError().Write(rw)
 		return
 	}
 
-	response.WriteSuccessResponse(rw, event, http.StatusOK)
+	if !recordExist {
+		r := response.New(
+			response.ACTION_ERROR,
+			http.StatusNotFound,
+			response.WithMessage("record does not exist"),
+		)
+		r.Write(rw)
+		return
+	}
+
+	response.New(
+		response.ACTION_SUCCESS,
+		http.StatusOK,
+		response.WithData(event),
+	).Write(rw)
 }
 
 func (h *handler) GetAllEvents(rw http.ResponseWriter, r *http.Request) {
 	entries, err := h.eventRepository.GetAll(r.Context())
 	if err != nil {
-		rw.WriteHeader(http.StatusInternalServerError)
+		response.GenerateInternalServerError().Write(rw)
 		return
 	}
 
-	response.WriteSuccessResponse(rw, entries, http.StatusOK)
+	response.New(
+		response.ACTION_SUCCESS,
+		http.StatusOK,
+		response.WithData(entries),
+	).Write(rw)
 }
 
 func (h *handler) DeleteEvent(rw http.ResponseWriter, r *http.Request) {
@@ -112,20 +146,32 @@ func (h *handler) DeleteEvent(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = h.eventRepository.Remove(r.Context(), eventID)
+	resourceExist, err := h.eventRepository.Remove(r.Context(), eventID)
 	if err != nil {
-		rw.WriteHeader(http.StatusInternalServerError)
+		response.GenerateInternalServerError().Write(rw)
 		return
 	}
 
-	response.WriteSuccessResponse(rw, nil, http.StatusOK)
+	if !resourceExist {
+		response.New(
+			response.ACTION_ERROR,
+			http.StatusNotFound,
+			response.WithMessage("record does not exist"),
+		).Write(rw)
+		return
+	}
+
+	response.New(
+		response.ACTION_SUCCESS,
+		http.StatusOK,
+	).Write(rw)
 }
 
 func (h *handler) AddEventBatch(rw http.ResponseWriter, r *http.Request) {
 	var batchRequest request.EventBatch
 	err := json.NewDecoder(r.Body).Decode(&batchRequest)
 	if err != nil {
-		rw.WriteHeader(http.StatusNotAcceptable)
+		response.GenerateInvalidRequestError().Write(rw)
 		return
 	}
 
@@ -152,12 +198,14 @@ func (h *handler) AddEventBatch(rw http.ResponseWriter, r *http.Request) {
 
 	err = h.eventRepository.InsertBatch(r.Context(), events)
 	if err != nil {
-		h.logger.Error(r.Context(), err.Error())
-		rw.WriteHeader(http.StatusInternalServerError)
+		response.GenerateInternalServerError().Write(rw)
 		return
 	}
 
-	response.WriteSuccessResponse(rw, nil, http.StatusCreated)
+	response.New(
+		response.ACTION_SUCCESS,
+		http.StatusCreated,
+	).Write(rw)
 }
 
 func getURLParam(r *http.Request, parameter string) (string, error) {

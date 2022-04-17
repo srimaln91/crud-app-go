@@ -107,17 +107,26 @@ func (er *eventRepository) GetAll(ctx context.Context) ([]entities.Event, error)
 
 	return events, nil
 }
-func (er *eventRepository) Remove(ctx context.Context, id string) error {
-	_, err := er.db.ExecContext(ctx, deleteQuery, id)
-
+func (er *eventRepository) Remove(ctx context.Context, id string) (rowsAffected bool, err error) {
+	result, err := er.db.ExecContext(ctx, deleteQuery, id)
 	if err != nil {
-		return err
+		return false, err
 	}
 
-	return nil
+	affectedRows, err := result.RowsAffected()
+	if err != nil {
+		return false, err
+	}
+
+	if affectedRows == 0 {
+		return false, nil
+	}
+
+	return true, nil
 }
-func (er *eventRepository) Update(ctx context.Context, id string, event entities.Event) error {
-	_, err := er.db.ExecContext(ctx, updateQuery,
+
+func (er *eventRepository) Update(ctx context.Context, id string, event entities.Event) (recordExist bool, err error) {
+	result, err := er.db.ExecContext(ctx, updateQuery,
 		event.AddrNbr,
 		event.ClientId,
 		event.EventCnt,
@@ -131,20 +140,30 @@ func (er *eventRepository) Update(ctx context.Context, id string, event entities
 	)
 
 	if err != nil {
-		return err
+		return false, err
 	}
 
-	return nil
+	affectedRows, err := result.RowsAffected()
+	if err != nil {
+		return false, err
+	}
+
+	if affectedRows == 0 {
+		return false, nil
+	}
+
+	return true, nil
 }
 
-func (er *eventRepository) Get(ctx context.Context, id string) (entities.Event, error) {
+func (er *eventRepository) Get(ctx context.Context, id string) (*entities.Event, error) {
 	rows, err := er.db.QueryContext(ctx, selectQuery, id)
 	if err != nil {
-		return entities.Event{}, err
+		return nil, err
 	}
 
-	var event entities.Event
+	var event *entities.Event = nil
 	for rows.Next() {
+		event = &entities.Event{}
 		err := rows.Scan(
 			&event.ID,
 			&event.AddrNbr,
@@ -159,7 +178,7 @@ func (er *eventRepository) Get(ctx context.Context, id string) (entities.Event, 
 		)
 
 		if err != nil {
-			return entities.Event{}, err
+			return nil, err
 		}
 	}
 
