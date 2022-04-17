@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: crud-app-go
-        image: crud-app-go:v1.2.0
+        image: crud-app-go:v1.3.0
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 8080
