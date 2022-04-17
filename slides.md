@@ -28,18 +28,20 @@ Simple Rest API implementation
 ## SpringBoot/ Apache Camel App
 - Connection Pooling for better performance
 - Use streaming and parallel executions in bulk message processing
-
+- Maintaining configurations in YAML format
 --- 
 
 ## Go Application
-- Layered architecture to make testable code
+- Layered architecture to make the code more testable
 - Hold dependancies in a custom DI container (I have not used any third party DI containers since this is a very small app)
-- Not using ORM for 3 reasons (There are some good ORM libraries present for GO)
+- Not using ORM for 3 reasons (There are some good ORM libraries available in GO)
     - Need control on low level stuff so we can write better optimizations
     - Can write and maintain SQL stuff in code since this is a small application
     - ORM comes with an added complexity and performance cost
 - JSON logging to faciliate faster log parsing and indexing
 - auto tagging builds/ images based on git tags
+- Graceful shutdown
+- Maintaining configurations in YAML format
 ---
 
 ## TODO
@@ -52,3 +54,5 @@ Simple Rest API implementation
 06. Store sensitive data in Secrets (databse passwords/usernames)
 07. propagate correlation IDs through boundaries and write it in logs
 08. Add/configure service health probes
+09. Helm charts for k8s config templates
+10. Worker pool implementation for Go app to control number of goroutines
