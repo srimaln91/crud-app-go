@@ -51,3 +51,4 @@ Simple Rest API implementation
 05. Automate docker builds on release tags
 06. Store sensitive data in Secrets (databse passwords/usernames)
 07. propagate correlation IDs through boundaries and write it in logs
+08. Add/configure service health probes
