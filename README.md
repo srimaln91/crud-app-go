@@ -76,9 +76,10 @@ Configs contin the following resouce types which are required to run the applica
 
 ## TODO
 
-01. Write unit tests and automate
+01. Improve test coverage (Configure pipelines to run tests automatically and report coverage %)
 02. Expose application matrices in prometheus format
-03. improvements on logging
+03. improvements in logging
 04. Write benchmarks on the hot code path
 05. Automate docker builds on release tags
 06. Store sensitive data in Secrets (databse passwords/usernames)
+07. propagate correlation IDs through boundaries and write it in logs
