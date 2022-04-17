@@ -188,6 +188,7 @@ func (er *eventRepository) Get(ctx context.Context, id string) (*entities.Event,
 
 // InsertBatch accepts a set of events and insert it to the database in a single transactoin
 // This method is optimized to reduce network roundtrips by executing queries as batches
+// TODO: rewrite this using a workgroup in order to avoid excessive goroutines being created.
 func (er *eventRepository) InsertBatch(ctx context.Context, events []entities.Event) error {
 
 	tx, err := er.db.Begin()
@@ -202,7 +203,7 @@ func (er *eventRepository) InsertBatch(ctx context.Context, events []entities.Ev
 	for _, chunk := range chunks {
 
 		wg.Add(1)
-		go func(chunk []entities.Event) {
+		go func(wg *sync.WaitGroup, chunk []entities.Event) {
 			defer wg.Done()
 
 			valueStrings := []string{}
@@ -239,7 +240,7 @@ func (er *eventRepository) InsertBatch(ctx context.Context, events []entities.Ev
 			if err != nil {
 				execError = err
 			}
-		}(chunk)
+		}(wg, chunk)
 	}
 
 	wg.Wait()
