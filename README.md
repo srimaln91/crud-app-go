@@ -14,14 +14,14 @@ docker run -dt --name crud-app-go -p 8080:8080 -v </absolute/path/to/config.yaml
 ```bash
 cd /path/to/project
 make image
-docker run -it --name crud-app-go -p 8086:8086 <image>
+docker run -dt --name crud-app-go -p 8080:8080 <image>
 ```
 
 The application will be listening on http port 8080.
 
 #### Use custom configuration
 
-You can use the custom config by mounting config.yaml file on the /app/config.yml path in the container.
+You can use the custom config by mounting config.yaml file on the /app/config/config.yml mount point in the container.
 
 ```bash
 docker run -dt --name crud-app-go -p 8080:8080 -v </absolute/path/to/config.yaml>:/app/config/config.yaml <image>
@@ -68,11 +68,11 @@ Kubernetes config files are placed in infra directory. Use the following command
 kubectl apply -R -f infra/
 ```
 
-Configs contin the following resouce types which are required to run the application
+Configs contain the following resouce types which are required to run the application
 01. deployment (infra/controllers/deployment.yaml)
 02. config maps (infra/config/configmap.yaml)
 03. service to create link with PostgreSQL node (infra/svc/postgres.yaml)
-04. service to act as load balancer (infra/svc/appService.yaml)
+04. service to act as a load balancer (infra/svc/appService.yaml)
 
 ## TODO
 
