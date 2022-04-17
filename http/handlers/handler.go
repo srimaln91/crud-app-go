@@ -19,6 +19,7 @@ type handler struct {
 }
 
 const URL_PARAM_ID = "id"
+const MESSAGE_RECORD_NOT_EXIST = "record does not exist"
 
 var errURLParamDoesNotExist = errors.New("url parameter does not exist")
 
@@ -72,6 +73,7 @@ func (h *handler) GetEvent(rw http.ResponseWriter, r *http.Request) {
 		response.New(
 			response.ACTION_ERROR,
 			http.StatusNotFound,
+			response.WithMessage(MESSAGE_RECORD_NOT_EXIST),
 		).Write(rw)
 		return
 	}
@@ -111,7 +113,7 @@ func (h *handler) UpdateEvent(rw http.ResponseWriter, r *http.Request) {
 		r := response.New(
 			response.ACTION_ERROR,
 			http.StatusNotFound,
-			response.WithMessage("record does not exist"),
+			response.WithMessage(MESSAGE_RECORD_NOT_EXIST),
 		)
 		r.Write(rw)
 		return
@@ -156,7 +158,7 @@ func (h *handler) DeleteEvent(rw http.ResponseWriter, r *http.Request) {
 		response.New(
 			response.ACTION_ERROR,
 			http.StatusNotFound,
-			response.WithMessage("record does not exist"),
+			response.WithMessage(MESSAGE_RECORD_NOT_EXIST),
 		).Write(rw)
 		return
 	}

@@ -85,21 +85,59 @@ func (er *eventRepository) GetAll(ctx context.Context) ([]entities.Event, error)
 	events := make([]entities.Event, 0)
 	for rows.Next() {
 		var event entities.Event
+		var addrNbr, clientId, locationCd, locationId1, locationId2, rcNum, transId, transTms sql.NullString
+		var eventCnt sql.NullInt64
 		err := rows.Scan(
 			&event.ID,
-			&event.AddrNbr,
-			&event.ClientId,
-			&event.EventCnt,
-			&event.LocationCd,
-			&event.LocationId1,
-			&event.LocationId2,
-			&event.RcNum,
-			&event.TransId,
-			&event.TransTms,
+			&addrNbr,
+			&clientId,
+			&eventCnt,
+			&locationCd,
+			&locationId1,
+			&locationId2,
+			&rcNum,
+			&transId,
+			&transTms,
 		)
 
 		if err != nil {
 			return nil, err
+		}
+
+		if addrNbr.Valid {
+			event.AddrNbr = addrNbr.String
+		}
+
+		if clientId.Valid {
+			event.ClientId = clientId.String
+		}
+
+		if eventCnt.Valid {
+			event.EventCnt = int(eventCnt.Int64)
+		}
+
+		if locationCd.Valid {
+			event.LocationCd = locationCd.String
+		}
+
+		if locationId1.Valid {
+			event.LocationId1 = locationId1.String
+		}
+
+		if locationId2.Valid {
+			event.LocationId2 = locationId2.String
+		}
+
+		if rcNum.Valid {
+			event.RcNum = rcNum.String
+		}
+
+		if transId.Valid {
+			event.TransId = transId.String
+		}
+
+		if transTms.Valid {
+			event.TransTms = transTms.String
 		}
 
 		events = append(events, event)
@@ -165,21 +203,58 @@ func (er *eventRepository) Get(ctx context.Context, id string) (*entities.Event,
 	var event *entities.Event = nil
 	for rows.Next() {
 		event = &entities.Event{}
+		var addrNbr, clientId, locationCd, locationId1, locationId2, rcNum, transId, transTms sql.NullString
+		var eventCnt sql.NullInt64
 		err := rows.Scan(
 			&event.ID,
-			&event.AddrNbr,
-			&event.ClientId,
-			&event.EventCnt,
-			&event.LocationCd,
-			&event.LocationId1,
-			&event.LocationId2,
-			&event.RcNum,
-			&event.TransId,
-			&event.TransTms,
+			&addrNbr,
+			&clientId,
+			&eventCnt,
+			&locationCd,
+			&locationId1,
+			&locationId2,
+			&rcNum,
+			&transId,
+			&transTms,
 		)
-
 		if err != nil {
 			return nil, err
+		}
+
+		if addrNbr.Valid {
+			event.AddrNbr = addrNbr.String
+		}
+
+		if clientId.Valid {
+			event.ClientId = clientId.String
+		}
+
+		if eventCnt.Valid {
+			event.EventCnt = int(eventCnt.Int64)
+		}
+
+		if locationCd.Valid {
+			event.LocationCd = locationCd.String
+		}
+
+		if locationId1.Valid {
+			event.LocationId1 = locationId1.String
+		}
+
+		if locationId2.Valid {
+			event.LocationId2 = locationId2.String
+		}
+
+		if rcNum.Valid {
+			event.RcNum = rcNum.String
+		}
+
+		if transId.Valid {
+			event.TransId = transId.String
+		}
+
+		if transTms.Valid {
+			event.TransTms = transTms.String
 		}
 	}
 
