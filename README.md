@@ -52,6 +52,10 @@ database:
 
 ## Host applications in Kubernetes
 
+### Architectural Diagram for Kuberntes setup
+
+![Diagram](./crud-app-architecture.png)
+
 ### Build image
 
 The image will be tagged automatically based on git tags/revisions

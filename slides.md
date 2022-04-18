@@ -5,6 +5,10 @@ paginate: true
 backgroundColor: #fff
 backgroundImage: url('https://marp.app/assets/hero-background.svg')
 marp: true
+style: |
+  li {
+    font-size: 25px;
+  }
 ---
 
 # **Assignment**
@@ -44,6 +48,15 @@ Simple Rest API implementation
 - Maintaining configurations in YAML format
 ---
 
+### Architectural diagram for k8s setup
+
+
+--- 
+
+![bg contain](./crud-app-architecture.png)
+
+
+---
 ## TODO
 
 01. Improve test coverage (Configure pipelines to run tests automatically and report coverage %)
