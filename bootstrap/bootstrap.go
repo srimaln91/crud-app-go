@@ -2,7 +2,6 @@ package bootstrap
 
 import (
 	"context"
-	"database/sql"
 	"flag"
 	"fmt"
 	"log"
@@ -14,14 +13,10 @@ import (
 	"github.com/srimaln91/crud-app-go/config"
 	"github.com/srimaln91/crud-app-go/container"
 	"github.com/srimaln91/crud-app-go/core/interfaces"
-	"github.com/srimaln91/crud-app-go/externals/adapters"
-	repositiories "github.com/srimaln91/crud-app-go/externals/repositories"
 	"github.com/srimaln91/crud-app-go/http/server"
-	"github.com/srimaln91/crud-app-go/logger"
 )
 
-var dbAdapter *sql.DB
-var logAdapter interfaces.Logger
+var logger interfaces.Logger
 var httpServer *server.Server
 
 func Start() {
@@ -32,40 +27,18 @@ func Start() {
 		log.Fatal(err)
 	}
 
-	logAdapter, err = logger.NewLogger(cfg.Logger.Level)
+	// Init container
+	ctr, err := container.Init(cfg)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	dbConfig := adapters.PostgresConfig{
-		Host:               cfg.Database.Host,
-		Database:           cfg.Database.Name,
-		User:               cfg.Database.User,
-		Password:           cfg.Database.Password,
-		Port:               cfg.Database.Port,
-		PoolSize:           cfg.Database.PoolSize,
-		MaxIdleConnections: cfg.Database.MaxIdleConnections,
-		ConnMaxLifeTime:    time.Duration(cfg.Database.ConnMaxLifeTime) * time.Millisecond,
-	}
-
-	dbAdapter, err = adapters.NewPostgresDB(dbConfig)
-	if err != nil {
-		logAdapter.Fatal(context.Background(), err.Error())
-	}
-
-	eventRepository := repositiories.NewEventRepository(dbAdapter, logAdapter)
-
-	// Build container
-	ctr := &container.Container{
-		DBAdapter:       dbAdapter,
-		EventRepository: eventRepository,
-		Logger:          logAdapter,
-	}
+	logger = ctr.Logger
 
 	// Initialize and start HTTP server
 	httpServer, err = server.Start(fmt.Sprintf("%s:%d", "0.0.0.0", cfg.HTTP.Port), ctr)
 	if err != nil {
-		logAdapter.Fatal(context.Background(), err.Error())
+		logger.Fatal(context.TODO(), err.Error())
 	}
 
 	// Listen for term signals
@@ -77,17 +50,17 @@ func Start() {
 	// Block until we receive our signal
 	signal := <-c
 
-	logAdapter.Info(context.Background(), fmt.Sprintf("received signal: %s", signal))
-	logAdapter.Info(context.Background(), "shutting down the service...")
+	logger.Info(context.TODO(), fmt.Sprintf("received signal: %s", signal))
+	logger.Info(context.TODO(), "shutting down the service...")
 
 	// Destruct other respouces and stop the service
-	Destruct()
+	Destruct(ctr)
 
 	// Exit with non zero error code
 	os.Exit(0)
 }
 
-func Destruct() {
+func Destruct(ctr *container.Container) {
 
 	// Shutdown Http server
 	// create a deadline of 5 seconds
@@ -99,10 +72,10 @@ func Destruct() {
 	<-ctx.Done()
 
 	// Close active/idle DB connections
-	err := dbAdapter.Close()
+	err := ctr.DBAdapter.Close()
 	if err != nil {
-		logAdapter.Error(context.Background(), err.Error())
+		logger.Error(context.TODO(), err.Error())
 	}
 
-	logAdapter.Info(context.Background(), "service shutted down gracefully.")
+	logger.Info(context.TODO(), "service shutted down gracefully.")
 }

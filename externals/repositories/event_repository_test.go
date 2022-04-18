@@ -8,11 +8,11 @@ import (
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/google/uuid"
 	"github.com/srimaln91/crud-app-go/core/entities"
-	"github.com/srimaln91/crud-app-go/logger"
+	"github.com/srimaln91/crud-app-go/log"
 	"github.com/srimaln91/crud-app-go/testutil"
 )
 
-var log, _ = logger.NewLogger(logger.DEBUG)
+var logger, _ = log.NewLogger(log.DEBUG)
 
 func TestAdd(t *testing.T) {
 
@@ -47,7 +47,7 @@ func TestAdd(t *testing.T) {
 		event.TransTms,
 	).WillReturnResult(sqlmock.NewResult(1, 1))
 
-	repository := NewEventRepository(db, log)
+	repository := NewEventRepository(db, logger)
 	err = repository.Add(context.Background(), event)
 	if err != nil {
 		t.Error(err)
@@ -77,7 +77,7 @@ func TestGetAll(t *testing.T) {
 
 	mock.ExpectQuery(regexp.QuoteMeta(selectAllQuery)).WillReturnRows(rows)
 
-	repository := NewEventRepository(db, log)
+	repository := NewEventRepository(db, logger)
 	resultEvents, err := repository.GetAll(context.Background())
 	if err != nil {
 		t.Error(err)

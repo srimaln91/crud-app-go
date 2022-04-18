@@ -12,12 +12,12 @@ import (
 
 	"github.com/srimaln91/crud-app-go/core/entities"
 	"github.com/srimaln91/crud-app-go/externals/repositories"
-	"github.com/srimaln91/crud-app-go/logger"
+	"github.com/srimaln91/crud-app-go/log"
 	"github.com/srimaln91/crud-app-go/testutil"
 )
 
 var eventRepository = repositories.NewEventRepositoryMock()
-var log, _ = logger.NewLogger(logger.DEBUG)
+var logger, _ = log.NewLogger(log.DEBUG)
 
 type responseWrapper struct {
 	Data    entities.Event `json:"data"`
@@ -42,7 +42,7 @@ func TestAddEvent(t *testing.T) {
 	req := httptest.NewRequest(http.MethodPost, "/rest/events", bytes)
 	w := httptest.NewRecorder()
 
-	h := NewHttpHandler(eventRepository, log)
+	h := NewHttpHandler(eventRepository, logger)
 	h.AddEvent(w, req)
 
 	res := w.Result()

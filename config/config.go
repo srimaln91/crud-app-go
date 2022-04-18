@@ -3,7 +3,7 @@ package config
 import (
 	"io/ioutil"
 
-	"github.com/srimaln91/crud-app-go/logger"
+	"github.com/srimaln91/crud-app-go/log"
 	yaml "gopkg.in/yaml.v3"
 )
 
@@ -12,7 +12,7 @@ type AppConfig struct {
 		Port int `yaml:"port"`
 	} `yaml:"http"`
 	Logger struct {
-		Level logger.Level `yaml:"level"`
+		Level log.Level `yaml:"level"`
 	} `yaml:"logger"`
 	Database DBConfig `yaml:"database"`
 }
