@@ -2,6 +2,15 @@
 
 ## How to run
 
+## Build the binary and run it
+
+Build tasks are configured in Makefile. You can take a list of tasks by executing `make help` command
+
+```bash
+make build
+./<build/version/binary> -config=<path/to/config/file.yaml>
+```
+
 ### Use Docker
 
 #### Run using publicly hosted image
@@ -48,6 +57,12 @@ database:
 
   conn_max_lifetime: 300000
 
+```
+
+## Run tests
+
+```bash
+make test
 ```
 
 ## Host applications in Kubernetes
