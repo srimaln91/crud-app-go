@@ -130,13 +130,12 @@ func (er *taskRepository) Remove(ctx context.Context, id string) (rowsAffected b
 	return true, nil
 }
 
-func (er *taskRepository) Update(ctx context.Context, id string, todoItem entities.Task) (recordExist bool, err error) {
+func (er *taskRepository) Update(ctx context.Context, id string, task entities.Task) (recordExist bool, err error) {
 	result, err := er.db.ExecContext(ctx, updateQuery,
-		todoItem.ID,
-		todoItem.Title,
-		todoItem.Description,
-		todoItem.DueDate,
-		todoItem.Completed,
+		task.Title,
+		task.Description,
+		task.DueDate,
+		task.Completed,
 		id,
 	)
 
