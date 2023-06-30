@@ -14,7 +14,7 @@ import (
 
 const (
 	insertQuery = `
-		INSERT INTO events.events
+		INSERT INTO events
 		(event_id, addr_nbr, client_id, event_cnt, location_cd, location_id1, location_id2, rc_num, trans_id, trans_tms)
 		VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10);
 	`

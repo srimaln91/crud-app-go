@@ -20,7 +20,7 @@ var logger interfaces.Logger
 var httpServer *server.Server
 
 func Start() {
-	configFilePath := flag.String("config", "config/config.yaml", "config file path")
+	configFilePath := flag.String("config", "config.yaml", "config file path")
 	flag.Parse()
 	cfg, err := config.Parse(*configFilePath)
 	if err != nil {

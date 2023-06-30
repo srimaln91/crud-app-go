@@ -18,14 +18,7 @@ type AppConfig struct {
 }
 
 type DBConfig struct {
-	Host               string `yaml:"host"`
-	Port               int    `yaml:"port"`
-	Name               string `yaml:"name"`
-	User               string `yaml:"user"`
-	Password           string `yaml:"password"`
-	PoolSize           int    `yaml:"pool_size"`
-	MaxIdleConnections int    `yaml:"max_idle_connections"`
-	ConnMaxLifeTime    int    `yaml:"conn_max_lifetime"`
+	Name string `yaml:"name"`
 }
 
 func Parse(path string) (*AppConfig, error) {
