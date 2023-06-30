@@ -8,27 +8,27 @@ import (
 )
 
 type eventRepositoryMock struct {
-	db map[string]entities.Event
+	db map[string]entities.Task
 	mu *sync.Mutex
 }
 
 func NewEventRepositoryMock() *eventRepositoryMock {
 	return &eventRepositoryMock{
-		db: make(map[string]entities.Event),
+		db: make(map[string]entities.Task),
 		mu: new(sync.Mutex),
 	}
 }
 
-func (er *eventRepositoryMock) Add(ctx context.Context, event entities.Event) error {
+func (er *eventRepositoryMock) Add(ctx context.Context, task entities.Task) error {
 	er.mu.Lock()
 	defer er.mu.Unlock()
 
-	er.db[event.ID] = event
+	er.db[task.ID] = task
 	return nil
 }
 
-func (er *eventRepositoryMock) GetAll(ctx context.Context) ([]entities.Event, error) {
-	events := make([]entities.Event, 0)
+func (er *eventRepositoryMock) GetAll(ctx context.Context) ([]entities.Task, error) {
+	events := make([]entities.Task, 0)
 
 	for _, event := range er.db {
 		events = append(events, event)
@@ -45,7 +45,7 @@ func (er *eventRepositoryMock) Remove(ctx context.Context, id string) (rowsAffec
 	return true, nil
 }
 
-func (er *eventRepositoryMock) Update(ctx context.Context, id string, event entities.Event) (recordExist bool, err error) {
+func (er *eventRepositoryMock) Update(ctx context.Context, id string, task entities.Task) (recordExist bool, err error) {
 	_, ok := er.db[id]
 	if !ok {
 		return false, nil
@@ -54,11 +54,11 @@ func (er *eventRepositoryMock) Update(ctx context.Context, id string, event enti
 	er.mu.Lock()
 	defer er.mu.Unlock()
 
-	er.db[id] = event
+	er.db[id] = task
 	return true, nil
 }
 
-func (er *eventRepositoryMock) Get(ctx context.Context, id string) (*entities.Event, error) {
+func (er *eventRepositoryMock) Get(ctx context.Context, id string) (*entities.Task, error) {
 	event, ok := er.db[id]
 	if !ok {
 		return nil, nil
@@ -67,7 +67,7 @@ func (er *eventRepositoryMock) Get(ctx context.Context, id string) (*entities.Ev
 	return &event, nil
 }
 
-func (er *eventRepositoryMock) InsertBatch(ctx context.Context, events []entities.Event) error {
+func (er *eventRepositoryMock) InsertBatch(ctx context.Context, events []entities.Task) error {
 	er.mu.Lock()
 	defer er.mu.Unlock()
 

@@ -4,6 +4,7 @@ import (
 	"context"
 	"regexp"
 	"testing"
+	"time"
 
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/google/uuid"
@@ -21,34 +22,24 @@ func TestAdd(t *testing.T) {
 		t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
 	}
 
-	event := entities.Event{
+	task := entities.Task{
 		ID:          uuid.New().String(),
-		TransId:     "trans-id",
-		TransTms:    "trans-tms",
-		RcNum:       "rcnum",
-		ClientId:    "clientid",
-		EventCnt:    1,
-		LocationCd:  "location-cd",
-		LocationId1: "location-id1",
-		LocationId2: "location-id2",
-		AddrNbr:     "addr-nbr",
+		Title:       "test title",
+		Description: "test description",
+		DueDate:     time.Now().Add(time.Hour * 20 * 7),
+		Completed:   false,
 	}
 
 	mock.ExpectExec(regexp.QuoteMeta(insertQuery)).WithArgs(
-		event.ID,
-		event.AddrNbr,
-		event.ClientId,
-		event.EventCnt,
-		event.LocationCd,
-		event.LocationId1,
-		event.LocationId2,
-		event.RcNum,
-		event.TransId,
-		event.TransTms,
+		task.ID,
+		task.Title,
+		task.Description,
+		task.DueDate,
+		task.Completed,
 	).WillReturnResult(sqlmock.NewResult(1, 1))
 
-	repository := NewEventRepository(db, logger)
-	err = repository.Add(context.Background(), event)
+	repository := NewTaskRepository(db, logger)
+	err = repository.Add(context.Background(), task)
 	if err != nil {
 		t.Error(err)
 	}
@@ -66,18 +57,18 @@ func TestGetAll(t *testing.T) {
 		t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
 	}
 
-	events := testutil.GenerateFakeEvents(10)
+	tasks := testutil.GenerateFakeTasks(10)
 
-	headers := []string{"event_id", "addr_nbr", "client_id", "event_cnt", "location_cd", "location_id1", "location_id2", "rc_num", "trans_id", "trans_tms"}
+	headers := []string{"event_id", "title", "description", "due_date", "completed"}
 	rows := sqlmock.NewRows(headers)
 
-	for _, e := range events {
-		rows.AddRow(e.ID, e.AddrNbr, e.ClientId, e.EventCnt, e.LocationCd, e.LocationId1, e.LocationId2, e.RcNum, e.TransId, e.TransTms)
+	for _, t := range tasks {
+		rows.AddRow(t.ID, t.Title, t.Description, t.DueDate, t.Completed)
 	}
 
 	mock.ExpectQuery(regexp.QuoteMeta(selectAllQuery)).WillReturnRows(rows)
 
-	repository := NewEventRepository(db, logger)
+	repository := NewTaskRepository(db, logger)
 	resultEvents, err := repository.GetAll(context.Background())
 	if err != nil {
 		t.Error(err)
@@ -89,8 +80,8 @@ func TestGetAll(t *testing.T) {
 
 	for _, resultEvent := range resultEvents {
 		found := false
-		for _, expectedEvent := range events {
-			if resultEvent.ID == expectedEvent.ID {
+		for _, expectedTask := range tasks {
+			if resultEvent.ID == expectedTask.ID {
 				found = true
 			}
 		}

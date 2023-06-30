@@ -2,7 +2,6 @@ package container
 
 import (
 	"database/sql"
-	"time"
 
 	"github.com/srimaln91/crud-app-go/config"
 	"github.com/srimaln91/crud-app-go/core/interfaces"
@@ -12,9 +11,9 @@ import (
 )
 
 type Container struct {
-	DBAdapter       *sql.DB
-	EventRepository interfaces.EventRepository
-	Logger          interfaces.Logger
+	DBAdapter      *sql.DB
+	TaskRepository interfaces.TaskRepository
+	Logger         interfaces.Logger
 }
 
 func Init(cfg *config.AppConfig) (*Container, error) {
@@ -32,9 +31,9 @@ func Init(cfg *config.AppConfig) (*Container, error) {
 
 	// Resolve repositories and return container
 	return &Container{
-		DBAdapter:       db,
-		Logger:          logAdapter,
-		EventRepository: repositories.NewEventRepository(db, logAdapter),
+		DBAdapter:      db,
+		Logger:         logAdapter,
+		TaskRepository: repositories.NewTaskRepository(db, logAdapter),
 	}, nil
 }
 
@@ -48,18 +47,11 @@ func resolveLogger(level log.Level) (interfaces.Logger, error) {
 }
 
 func resolveDatabase(cfg config.DBConfig) (*sql.DB, error) {
-	dbConfig := adapters.PostgresConfig{
-		Host:               cfg.Host,
-		Database:           cfg.Name,
-		User:               cfg.User,
-		Password:           cfg.Password,
-		Port:               cfg.Port,
-		PoolSize:           cfg.PoolSize,
-		MaxIdleConnections: cfg.MaxIdleConnections,
-		ConnMaxLifeTime:    time.Duration(cfg.ConnMaxLifeTime) * time.Millisecond,
+	dbConfig := adapters.SQLiteConfig{
+		DatabasePath: cfg.Path,
 	}
 
-	dbAdapter, err := adapters.NewPostgresDB(dbConfig)
+	dbAdapter, err := adapters.NewSQLiteDB(dbConfig)
 	if err != nil {
 		return nil, err
 	}

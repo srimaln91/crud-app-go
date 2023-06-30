@@ -9,13 +9,12 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/srimaln91/crud-app-go/core/entities"
 	"github.com/srimaln91/crud-app-go/core/interfaces"
-	"github.com/srimaln91/crud-app-go/http/request"
 	"github.com/srimaln91/crud-app-go/http/response"
 )
 
 type handler struct {
-	logger          interfaces.Logger
-	eventRepository interfaces.EventRepository
+	logger         interfaces.Logger
+	taskRepository interfaces.TaskRepository
 }
 
 const URL_PARAM_ID = "id"
@@ -23,26 +22,27 @@ const MESSAGE_RECORD_NOT_EXIST = "record does not exist"
 
 var errURLParamDoesNotExist = errors.New("url parameter does not exist")
 
-func NewHttpHandler(eventRepository interfaces.EventRepository, logger interfaces.Logger) *handler {
+func NewHttpHandler(taskRepository interfaces.TaskRepository, logger interfaces.Logger) *handler {
 	return &handler{
-		eventRepository: eventRepository,
-		logger:          logger,
+		taskRepository: taskRepository,
+		logger:         logger,
 	}
 }
 
-func (h *handler) AddEvent(rw http.ResponseWriter, r *http.Request) {
-	var event entities.Event
-	err := json.NewDecoder(r.Body).Decode(&event)
+func (h *handler) AddTask(rw http.ResponseWriter, r *http.Request) {
+	var task entities.Task
+	err := json.NewDecoder(r.Body).Decode(&task)
 	if err != nil {
+		h.logger.Error(r.Context(), err.Error())
 		response.GenerateInvalidRequestError().Write(rw)
 		return
 	}
 
 	defer r.Body.Close()
 
-	event.ID = uuid.New().String()
+	task.ID = uuid.New().String()
 
-	err = h.eventRepository.Add(r.Context(), event)
+	err = h.taskRepository.Add(r.Context(), task)
 	if err != nil {
 		h.logger.Error(r.Context(), err.Error())
 		response.GenerateInternalServerError().Write(rw)
@@ -52,19 +52,19 @@ func (h *handler) AddEvent(rw http.ResponseWriter, r *http.Request) {
 	response.New(
 		response.ACTION_SUCCESS,
 		http.StatusCreated,
-		response.WithData(event),
+		response.WithData(task),
 	).Write(rw)
 }
 
-func (h *handler) GetEvent(rw http.ResponseWriter, r *http.Request) {
+func (h *handler) GetTask(rw http.ResponseWriter, r *http.Request) {
 
-	eventID, err := getURLParam(r, URL_PARAM_ID)
+	taskID, err := getURLParam(r, URL_PARAM_ID)
 	if err != nil {
 		response.GenerateInvalidRequestError().Write(rw)
 		return
 	}
 
-	entry, err := h.eventRepository.Get(r.Context(), eventID)
+	entry, err := h.taskRepository.Get(r.Context(), taskID)
 	if err != nil {
 		h.logger.Error(r.Context(), err.Error())
 		response.GenerateInternalServerError().Write(rw)
@@ -87,7 +87,7 @@ func (h *handler) GetEvent(rw http.ResponseWriter, r *http.Request) {
 	).Write(rw)
 }
 
-func (h *handler) UpdateEvent(rw http.ResponseWriter, r *http.Request) {
+func (h *handler) UpdateTask(rw http.ResponseWriter, r *http.Request) {
 
 	eventID, err := getURLParam(r, URL_PARAM_ID)
 	if err != nil {
@@ -95,17 +95,17 @@ func (h *handler) UpdateEvent(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var event entities.Event
-	err = json.NewDecoder(r.Body).Decode(&event)
+	var task entities.Task
+	err = json.NewDecoder(r.Body).Decode(&task)
 	if err != nil {
 		response.GenerateInvalidRequestError().Write(rw)
 		return
 	}
 
-	event.ID = eventID
+	task.ID = eventID
 	defer r.Body.Close()
 
-	recordExist, err := h.eventRepository.Update(r.Context(), event.ID, event)
+	recordExist, err := h.taskRepository.Update(r.Context(), task.ID, task)
 	if err != nil {
 		h.logger.Error(r.Context(), err.Error())
 		response.GenerateInternalServerError().Write(rw)
@@ -125,12 +125,12 @@ func (h *handler) UpdateEvent(rw http.ResponseWriter, r *http.Request) {
 	response.New(
 		response.ACTION_SUCCESS,
 		http.StatusOK,
-		response.WithData(event),
+		response.WithData(task),
 	).Write(rw)
 }
 
-func (h *handler) GetAllEvents(rw http.ResponseWriter, r *http.Request) {
-	entries, err := h.eventRepository.GetAll(r.Context())
+func (h *handler) GetAllTasks(rw http.ResponseWriter, r *http.Request) {
+	entries, err := h.taskRepository.GetAll(r.Context())
 	if err != nil {
 		h.logger.Error(r.Context(), err.Error())
 		response.GenerateInternalServerError().Write(rw)
@@ -144,15 +144,15 @@ func (h *handler) GetAllEvents(rw http.ResponseWriter, r *http.Request) {
 	).Write(rw)
 }
 
-func (h *handler) DeleteEvent(rw http.ResponseWriter, r *http.Request) {
+func (h *handler) DeleteTask(rw http.ResponseWriter, r *http.Request) {
 
-	eventID, err := getURLParam(r, URL_PARAM_ID)
+	taskID, err := getURLParam(r, URL_PARAM_ID)
 	if err != nil {
 		rw.WriteHeader(http.StatusNotAcceptable)
 		return
 	}
 
-	resourceExist, err := h.eventRepository.Remove(r.Context(), eventID)
+	resourceExist, err := h.taskRepository.Remove(r.Context(), taskID)
 	if err != nil {
 		h.logger.Error(r.Context(), err.Error())
 		response.GenerateInternalServerError().Write(rw)
@@ -171,48 +171,6 @@ func (h *handler) DeleteEvent(rw http.ResponseWriter, r *http.Request) {
 	response.New(
 		response.ACTION_SUCCESS,
 		http.StatusOK,
-	).Write(rw)
-}
-
-func (h *handler) AddEventBatch(rw http.ResponseWriter, r *http.Request) {
-	var batchRequest request.EventBatch
-	err := json.NewDecoder(r.Body).Decode(&batchRequest)
-	if err != nil {
-		response.GenerateInvalidRequestError().Write(rw)
-		return
-	}
-
-	defer r.Body.Close()
-
-	events := make([]entities.Event, 0)
-
-	for _, record := range batchRequest.Records {
-		for _, event := range record.Event {
-			events = append(events, entities.Event{
-				ID:          uuid.New().String(),
-				TransId:     record.TransID,
-				TransTms:    record.TransTms,
-				RcNum:       record.RcNum,
-				ClientId:    record.ClientID,
-				EventCnt:    event.EventCnt,
-				LocationCd:  event.LocationCd,
-				LocationId1: event.LocationID1,
-				LocationId2: event.LocationID2,
-				AddrNbr:     event.AddrNbr,
-			})
-		}
-	}
-
-	err = h.eventRepository.InsertBatch(r.Context(), events)
-	if err != nil {
-		h.logger.Error(r.Context(), err.Error())
-		response.GenerateInternalServerError().Write(rw)
-		return
-	}
-
-	response.New(
-		response.ACTION_SUCCESS,
-		http.StatusCreated,
 	).Write(rw)
 }
 

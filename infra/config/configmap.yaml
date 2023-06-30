@@ -11,11 +11,4 @@ data:
       level: "DEBUG"
 
     database:
-      host: postgresql
-      port: 5432
-      name: events
-      user: docker
-      password: 'docker@123'
-      pool_size: 5
-      max_idle_connections: 2
-      conn_max_lifetime: 300000
+      name: tasks

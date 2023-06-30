@@ -1,10 +1,14 @@
 # CRUD App Go
 
+This is a sample Go application that showcases CRUD functionalities using the Go programming language. The application utilizes a SQLite database for data storage and retrieval.
+
 ## How to run
+
+The application will create an SQLite database automatically. The database path can be configured.
 
 ## Build the binary and run it
 
-Build tasks are configured in Makefile. You can take a list of tasks by executing `make help` command
+Build tasks are already configured in the Makefile. You can take a list of tasks by executing `make help` command
 
 ```bash
 make build
@@ -47,15 +51,7 @@ logger:
   level: "DEBUG"
 
 database:
-  host: localhost
-  port: 5432
-  name: dbname
-  user: username
-  password: *****
-  pool_size: 5
-  max_idle_connections: 2
-
-  conn_max_lifetime: 300000
+  path: db/tasks.db
 
 ```
 
@@ -67,45 +63,42 @@ make test
 
 ## Host applications in Kubernetes
 
-### Architectural Diagram for Kuberntes setup
-
-![Diagram](./crud-app-architecture.png)
-
-### Build image
-
-The image will be tagged automatically based on git tags/revisions
-
-Note: Have to point the shell to minikube Docker daemon before building images
-
-```bash
- eval $(minikube -p minikube docker-env)
-```
-
-```bash
-make image
-```
-
-### Create K8s resources
-
-Kubernetes config files are placed in infra directory. Use the following command to apply configs
+Kubernetes config files are placed in the `infra` directory. Use the following command to apply configs
 
 ```bash
 kubectl apply -R -f infra/
 ```
 
 Configs contain the following resouce types which are required to run the application
-01. deployment (infra/controllers/deployment.yaml)
-02. config maps (infra/config/configmap.yaml)
-03. service to create link with PostgreSQL node (infra/svc/postgres.yaml)
-04. service to act as a load balancer (infra/svc/appService.yaml)
+01. Deployment (infra/controllers/deployment.yaml)
+02. ConfigMap (infra/config/configmap.yaml)
+04. Service (infra/svc/appService.yaml)
 
-## TODO
+## HTTP API
 
-01. Improve test coverage (Configure pipelines to run tests automatically and report coverage %)
-02. Expose application matrices in prometheus format
-03. improvements in logging
-04. Write benchmarks on the hot code path
-05. Automate docker builds on release tags
-06. Store sensitive data in Secrets (databse passwords/usernames)
-07. propagate correlation IDs through boundaries and write it in logs
-08. Pagination on get-all endpoints
+### Create Task
+```bash
+curl -x POST --location 'http://localhost:8080/api/tasks' \
+--header 'Content-Type: application/json' \
+--data '{
+  "title": "Finish Homework",
+  "description": "Complete math problems 1-10 and submit online.",
+  "dueDate": "2023-07-05T10:15:00+00:00",
+  "completed": false
+}'
+```
+
+### Get Task
+```bash
+curl --location 'http://localhost:8080/api/tasks/727fa72b-503a-4799-b315-6dda9f145461'
+```
+
+### Get All Tasks
+```bash
+curl --location 'http://localhost:8080/api/tasks'
+```
+
+### Delete Task
+```bash
+curl -X DELETE --location 'http://localhost:8080/api/tasks/3b7e5edb-6d0c-44a5-94a4-ba47742c0cd3'
+```

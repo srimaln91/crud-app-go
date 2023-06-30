@@ -10,19 +10,17 @@ import (
 )
 
 func newRouter(ctr *container.Container) (http.Handler, error) {
-	eventRepository := repositories.NewEventRepository(ctr.DBAdapter, ctr.Logger)
+	eventRepository := repositories.NewTaskRepository(ctr.DBAdapter, ctr.Logger)
 
 	httpHandler := handlers.NewHttpHandler(eventRepository, ctr.Logger)
 
 	r := mux.NewRouter()
 
-	r.HandleFunc("/api/events", httpHandler.AddEvent).Methods(http.MethodPost)
-	r.HandleFunc("/api/events", httpHandler.GetAllEvents).Methods(http.MethodGet)
-	r.HandleFunc("/api/events/{id}", httpHandler.GetEvent).Methods(http.MethodGet)
-	r.HandleFunc("/api/events/{id}", httpHandler.UpdateEvent).Methods(http.MethodPut)
-	r.HandleFunc("/api/events/{id}", httpHandler.DeleteEvent).Methods(http.MethodDelete)
-
-	r.HandleFunc("/api/batch", httpHandler.AddEventBatch).Methods(http.MethodPost)
+	r.HandleFunc("/api/tasks", httpHandler.AddTask).Methods(http.MethodPost)
+	r.HandleFunc("/api/tasks", httpHandler.GetAllTasks).Methods(http.MethodGet)
+	r.HandleFunc("/api/tasks/{id}", httpHandler.GetTask).Methods(http.MethodGet)
+	r.HandleFunc("/api/tasks/{id}", httpHandler.UpdateTask).Methods(http.MethodPut)
+	r.HandleFunc("/api/tasks/{id}", httpHandler.DeleteTask).Methods(http.MethodDelete)
 
 	return r, nil
 }
