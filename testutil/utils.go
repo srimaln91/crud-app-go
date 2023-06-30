@@ -5,14 +5,14 @@ import (
 	"github.com/srimaln91/crud-app-go/core/entities"
 )
 
-func GenerateFakeEvents(count int) []entities.Event {
-	events := make([]entities.Event, count)
+func GenerateFakeTasks(count int) []entities.Task {
+	tasks := make([]entities.Task, count)
 
 	for i := 0; i < count; i++ {
-		var e entities.Event
+		var e entities.Task
 		faker.FakeData(&e)
-		events[i] = e
+		tasks[i] = e
 	}
 
-	return events
+	return tasks
 }

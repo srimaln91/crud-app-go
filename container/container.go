@@ -11,9 +11,9 @@ import (
 )
 
 type Container struct {
-	DBAdapter       *sql.DB
-	EventRepository interfaces.EventRepository
-	Logger          interfaces.Logger
+	DBAdapter      *sql.DB
+	TaskRepository interfaces.TaskRepository
+	Logger         interfaces.Logger
 }
 
 func Init(cfg *config.AppConfig) (*Container, error) {
@@ -31,9 +31,9 @@ func Init(cfg *config.AppConfig) (*Container, error) {
 
 	// Resolve repositories and return container
 	return &Container{
-		DBAdapter:       db,
-		Logger:          logAdapter,
-		EventRepository: repositories.NewEventRepository(db, logAdapter),
+		DBAdapter:      db,
+		Logger:         logAdapter,
+		TaskRepository: repositories.NewTaskRepository(db, logAdapter),
 	}, nil
 }
 
@@ -48,7 +48,7 @@ func resolveLogger(level log.Level) (interfaces.Logger, error) {
 
 func resolveDatabase(cfg config.DBConfig) (*sql.DB, error) {
 	dbConfig := adapters.SQLiteConfig{
-		DatabasePath: "db/" + cfg.Name,
+		DatabasePath: cfg.Path,
 	}
 
 	dbAdapter, err := adapters.NewSQLiteDB(dbConfig)

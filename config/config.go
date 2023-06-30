@@ -18,7 +18,7 @@ type AppConfig struct {
 }
 
 type DBConfig struct {
-	Name string `yaml:"name"`
+	Path string `yaml:"path"`
 }
 
 func Parse(path string) (*AppConfig, error) {
