@@ -16,7 +16,7 @@ RUN go mod download
 COPY . .
 
 # Unit tests
-RUN CGO_ENABLED=0 go test -v ./...
+RUN CGO_ENABLED=1 go test -v ./...
 
 # Build the Go app
 RUN CGO_ENABLED=1 go build -ldflags \
