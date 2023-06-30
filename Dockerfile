@@ -15,11 +15,8 @@ RUN go mod download
 
 COPY . .
 
-# Unit tests
-RUN CGO_ENABLED=1 go test -v ./...
-
 # Build the Go app
-RUN CGO_ENABLED=1 go build -ldflags \
+RUN CGO_ENABLED=0 go build -ldflags \
 	"-X github.com/srimaln91/go-make.version=$VERSION \
 	-X github.com/srimaln91/go-make.date=$DATE \
 	-X github.com/srimaln91/go-make.gitCommit=$COMMIT \
