@@ -27,3 +27,7 @@ spec:
       - name: config
         configMap:
           name: crud-app-config-go
+      volumes:
+      - name: volume
+        persistentVolumeClaim:
+          claimName: crud-app-db-vol
