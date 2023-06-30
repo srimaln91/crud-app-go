@@ -89,7 +89,7 @@ func (h *handler) GetTask(rw http.ResponseWriter, r *http.Request) {
 
 func (h *handler) UpdateTask(rw http.ResponseWriter, r *http.Request) {
 
-	eventID, err := getURLParam(r, URL_PARAM_ID)
+	taskID, err := getURLParam(r, URL_PARAM_ID)
 	if err != nil {
 		response.GenerateInvalidRequestError().Write(rw)
 		return
@@ -102,7 +102,7 @@ func (h *handler) UpdateTask(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	task.ID = eventID
+	task.ID = taskID
 	defer r.Body.Close()
 
 	recordExist, err := h.taskRepository.Update(r.Context(), task.ID, task)

@@ -2,3 +2,5 @@
 config.yaml
 build/
 slides.pdf
+
+db/
