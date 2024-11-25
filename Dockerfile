@@ -16,20 +16,23 @@ RUN go mod download
 COPY . .
 
 # Build the Go app
-RUN CGO_ENABLED=1 go build -ldflags \
+RUN CGO_ENABLED=0 go build -ldflags \
 	"-X github.com/srimaln91/go-make.version=$VERSION \
 	-X github.com/srimaln91/go-make.date=$DATE \
 	-X github.com/srimaln91/go-make.gitCommit=$COMMIT \
 	-X github.com/srimaln91/go-make.osArch=$OS/$ARCH" -o crud-app-linux-amd64 cmd/api/main.go
 
-FROM alpine:3.9
+
+FROM alpine:3.20
 RUN apk add ca-certificates
 
 COPY --from=build_go /tmp/crud-app/crud-app-linux-amd64 /app/
-COPY config.yaml /app/config/
+# COPY config.yaml /app/
 
 WORKDIR /app
 
 EXPOSE 8080
 
+RUN pwd
+RUN ls -al
 CMD ["/app/crud-app-linux-amd64"]

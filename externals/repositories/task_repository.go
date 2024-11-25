@@ -15,12 +15,12 @@ const (
 		VALUES($1, $2, $3, $4, $5);
 	`
 
-	deleteQuery = `DELETE FROM tasks WHERE id = $1`
+	deleteQuery = `DELETE FROM tasks WHERE id = $1::uuid`
 
 	updateQuery = `
 		UPDATE tasks
 		SET title=$1, description=$2, due_date=$3, completed=$4
-		WHERE id=$5;
+		WHERE id=$5::uuid;
 	`
 	selectQuery = `
 		SELECT id, title, description, due_date, completed
@@ -40,19 +40,6 @@ type taskRepository struct {
 }
 
 func NewTaskRepository(db *sql.DB, logger interfaces.Logger) *taskRepository {
-	// create table if not exists
-	_, err := db.Exec(`CREATE TABLE IF NOT EXISTS tasks (
-		id INT PRIMARY KEY,
-		title VARCHAR(255),
-		description TEXT,
-		due_date DATETIME,
-		completed BOOLEAN
-	  );`)
-
-	if err != nil {
-		logger.Warn(context.Background(), "unable to create task table", err.Error())
-	}
-
 	return &taskRepository{
 		db:     db,
 		logger: logger,

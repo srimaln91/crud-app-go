@@ -35,6 +35,8 @@ func Start() {
 
 	logger = ctr.Logger
 
+	logger.Info(context.Background(), "service config", cfg)
+
 	// Initialize and start HTTP server
 	httpServer, err = server.Start(fmt.Sprintf("%s:%d", "0.0.0.0", cfg.HTTP.Port), ctr)
 	if err != nil {

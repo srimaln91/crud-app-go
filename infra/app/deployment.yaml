@@ -16,18 +16,18 @@ spec:
     spec:
       containers:
       - name: crud-app-go
-        image: crud-app-go:v1.6.0
-        imagePullPolicy: IfNotPresent
+        image: srimaln91/crud-app:v3
+        imagePullPolicy: Always
         ports:
         - containerPort: 8080
+        command:
+        - "/app/crud-app-linux-amd64"  # Entrypoint matches the binary path in the Dockerfile
+        args:
+        - "--config=/app/config/config.yaml"  # Argument for the config file
         volumeMounts:
-          - name: config
-            mountPath: /app/config
+        - name: config
+          mountPath: /app/config
       volumes:
       - name: config
         configMap:
           name: crud-app-config-go
-      volumes:
-      - name: volume
-        persistentVolumeClaim:
-          claimName: crud-app-db-vol

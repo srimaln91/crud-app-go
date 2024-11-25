@@ -1,0 +1,39 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: postgres-init-script
+data:
+  init.sql: |
+    -- Your SQL script here
+    -- Create a database
+    CREATE DATABASE app_db;
+
+    -- Switch to the new database
+    \c app_db;
+
+    -- Create a user with a password
+    CREATE USER app_user WITH PASSWORD 'app_password';
+
+    -- Grant all privileges to the new user on the database
+    GRANT ALL PRIVILEGES ON DATABASE app_db TO app_user;
+
+    -- Create a sample table
+    CREATE TABLE IF NOT EXISTS tasks (
+        id UUID PRIMARY KEY,
+        title VARCHAR(255),
+        description TEXT,
+        due_date TIMESTAMP,
+        completed BOOLEAN
+    );
+
+    GRANT ALL PRIVILEGES ON TABLE tasks TO app_user;
+    
+    -- Insert sample data
+    INSERT INTO tasks (id, title, description, due_date, completed)
+    VALUES 
+    ('b68b4326-c898-454d-8e7b-44d877944db0', 'Buy groceries', 'Purchase milk, eggs, bread, and fruits.', '2024-11-19 10:00:00', false),
+    ('cbfb5584-3b47-4362-9248-68e2284fa941', 'Complete project report', 'Finalize and submit the quarterly project report.', '2024-11-20 15:00:00', false),
+    ('a9a1b273-9fa7-4f87-98a6-612786e77e5b', 'Plan birthday party', 'Organize the venue, decorations, and guest list for the birthday party.', '2024-11-25 18:00:00', false),
+    ('383b0e11-9444-4754-acae-bb8f0df9445a', 'Attend team meeting', 'Participate in the weekly team sync-up meeting.', '2024-11-21 09:00:00', true),
+    ('d57ed4ff-51b8-48d7-9a6b-8d296b39613c', 'Car maintenance', 'Take the car for oil change and tire rotation.', '2024-11-22 11:00:00', false);
+

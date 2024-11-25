@@ -2,6 +2,7 @@ package container
 
 import (
 	"database/sql"
+	"time"
 
 	"github.com/srimaln91/crud-app-go/config"
 	"github.com/srimaln91/crud-app-go/core/interfaces"
@@ -47,11 +48,18 @@ func resolveLogger(level log.Level) (interfaces.Logger, error) {
 }
 
 func resolveDatabase(cfg config.DBConfig) (*sql.DB, error) {
-	dbConfig := adapters.SQLiteConfig{
-		DatabasePath: cfg.Path,
+	dbConfig := adapters.PostgresConfig{
+		Database:           cfg.Database,
+		Host:               cfg.Host,
+		User:               cfg.User,
+		Password:           cfg.Password,
+		Port:               cfg.Port,
+		PoolSize:           cfg.PoolSize,
+		MaxIdleConnections: cfg.MaxIdleConnections,
+		ConnMaxLifeTime:    time.Second * time.Duration(cfg.ConnMaxLifeTime),
 	}
 
-	dbAdapter, err := adapters.NewSQLiteDB(dbConfig)
+	dbAdapter, err := adapters.NewPostgresDB(dbConfig)
 	if err != nil {
 		return nil, err
 	}

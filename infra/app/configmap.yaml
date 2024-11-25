@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: crud-app-config-go
+data:
+  config.yaml: |
+    http:
+      port: 8080
+    logger:
+      level: "DEBUG"
+    database:
+      host: postgres
+      user: app_user
+      password: app_password
+      port: 5432
+      database: app_db
+      pool-size: 5
+      max-idle-conns: 2
+      max-conn-lifetime: 60
